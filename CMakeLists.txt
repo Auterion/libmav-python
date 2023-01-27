@@ -3,7 +3,14 @@ project(libmav)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(pybind11)
-pybind11_add_module(libmav src/main.cpp)
+pybind11_add_module(libmav
+        src/bind_main.cpp
+        src/bind_Message.cpp
+        src/bind_utils.cpp
+        src/bind_MessageSet.cpp
+        src/bind_MessageDefinition.cpp)
+
+target_include_directories(libmav PRIVATE src/libmavlink/include)
 
 # EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
 # define (VERSION_INFO) here.
