@@ -125,10 +125,26 @@ class TestMessage(unittest.TestCase):
         output = message.to_dict()
         self.assertEqual(original, output)
 
-class TestTCP(unittest.TestCase):
+class TestPhysical(unittest.TestCase):
     def setUp(self) -> None:
         self.message_set = libmav.MessageSet()
         self.message_set.add_from_xml_string(BIG_MESSAGE)
+
+        self.big_message = self.message_set.create('BIG_MESSAGE').set_from_dict({
+            'uint8_field': 1,
+            'int8_field': 2,
+            'uint16_field': 3,
+            'int16_field': 4,
+            'uint32_field': 5,
+            'int32_field': 6,
+            'uint64_field': 7,
+            'int64_field': 8,
+            'double_field': 9.4,
+            'float_field': 10.5,
+            'char_arr_field': 'Hello world',
+            'float_arr_field': [1.0, 2.0, 3.0],
+            'int32_arr_field': [4, 5, 6]
+        })
 
     def testTCPConnection(self):
 
@@ -146,70 +162,49 @@ class TestTCP(unittest.TestCase):
         client_physical = libmav.TCPClient('127.0.0.1', 193413)
         client_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, client_physical)
 
-        server_conn = server_runtime.await_connection(100)
-        client_conn = client_runtime.await_connection(100)
+        server_conn = server_runtime.await_connection(2000)
+        client_conn = client_runtime.await_connection(2000)
 
-        message = self.message_set.create('BIG_MESSAGE').set_from_dict({
-            'uint8_field': 1,
-            'int8_field': 2,
-            'uint16_field': 3,
-            'int16_field': 4,
-            'uint32_field': 5,
-            'int32_field': 6,
-            'uint64_field': 7,
-            'int64_field': 8,
-            'double_field': 9.0,
-            'float_field': 10.0,
-            'char_arr_field': 'Hello world',
-            'float_arr_field': [1.0, 2.0, 3.0],
-            'int32_arr_field': [4, 5, 6]
-        })
-
-        expectation = client_conn.expect_message('BIG_MESSAGE')
-        server_conn.send(message)
+        expectation = client_conn.expect('BIG_MESSAGE')
+        server_conn.send(self.big_message)
         response = client_conn.receive(expectation, 100)
 
-        self.assertEqual(message.to_dict(), response.to_dict())
+        self.assertEqual(self.big_message.to_dict(), response.to_dict())
 
-        expectation = server_conn.expect_message('BIG_MESSAGE')
-        client_conn.send(message)
+        expectation = server_conn.expect('BIG_MESSAGE')
+        client_conn.send(self.big_message)
         response = server_conn.receive(expectation, 100)
-        self.assertEqual(message.to_dict(), response.to_dict())
+        self.assertEqual(self.big_message.to_dict(), response.to_dict())
+
+    def testUDPConnection(self):
+        heartbeat = self.message_set.create('HEARTBEAT').set_from_dict({
+            'type': 1,
+            'autopilot': 2,
+            'base_mode': 3,
+            'custom_mode': 4,
+            'system_status': 5,
+            'mavlink_version': 6
+        })
+        server_physical = libmav.UDPServer(193413)
+        server_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, server_physical)
+
+        client_physical = libmav.UDPClient('127.0.0.1', 193413)
+        client_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, client_physical)
+
+        server_conn = server_runtime.await_connection(2000)
+        client_conn = client_runtime.await_connection(2000)
+
+        expectation = client_conn.expect('BIG_MESSAGE')
+        server_conn.send(self.big_message)
+        response = client_conn.receive(expectation, 100)
+
+        self.assertEqual(self.big_message.to_dict(), response.to_dict())
+
+        expectation = server_conn.expect('BIG_MESSAGE')
+        client_conn.send(self.big_message)
+        response = server_conn.receive(expectation, 100)
+        self.assertEqual(self.big_message.to_dict(), response.to_dict())
 
 
 if __name__ == '__main__':
     unittest.main()
-
-# message_set = libmav.MessageSet('/home/thomas/projects/mavlink/message_definitions/v1.0/common.xml')
-#
-#
-# temp_message = message_set.create("TEMPERATURE_MEASUREMENT")
-# temp_message["temperature"] = 12.6
-#
-# message = message_set.create("CHANGE_OPERATOR_CONTROL")
-#
-# string = message['passkey']
-# print(len(string))
-# print(string)
-#
-# message['passkey'] = "Hello world"
-#
-# print(message['passkey'])
-#
-# for key in message.type.keys():
-#     print('KEY ' + key)
-#
-# if 'target_system' in message:
-#     message['target_system'] = 1
-# else:
-#     message['target_system'] = 2
-#
-# for key, value in message:
-#     print('-> ' + key + ": " + str(value))
-#
-#
-# print('HEARTBEAT' in message_set)
-# print(0 in message_set)
-#
-# print('All done!')
-
