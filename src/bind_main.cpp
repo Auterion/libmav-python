@@ -10,6 +10,9 @@ void bind_Message(py::module);
 void bind_utils(py::module);
 void bind_MessageSet(py::module);
 void bind_MessageDefinition(py::module);
+void bind_NetworkRuntime(py::module);
+void bind_Connection(py::module);
+void bind_PhysicalNetwork(py::module);
 
 
 PYBIND11_MODULE(libmav, m) {
@@ -27,6 +30,9 @@ PYBIND11_MODULE(libmav, m) {
     bind_utils(m);
     bind_MessageSet(m);
     bind_MessageDefinition(m);
+    bind_NetworkRuntime(m);
+    bind_Connection(m);
+    bind_PhysicalNetwork(m);
 
 
 #ifdef VERSION_INFO

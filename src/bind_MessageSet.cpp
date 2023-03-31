@@ -16,9 +16,10 @@ void bind_MessageSet(py::module m) {
             .def(py::init<const std::string&>())
             .def("create", static_cast<Message(MessageSet::*)(const std::string&) const>(&MessageSet::create))
             .def("create", static_cast<Message(MessageSet::*)(int) const>(&MessageSet::create))
-            .def("idForMessage", &MessageSet::idForMessage)
-            .def("addFromXMLString", &MessageSet::addFromXMLString)
-            .def("addFromXMLFile", &MessageSet::addFromXML)
+            .def("id_for_message", &MessageSet::idForMessage)
+            .def("enum", &MessageSet::enum_for)
+            .def("add_from_xml_string", &MessageSet::addFromXMLString)
+            .def("add_from_xml_file", &MessageSet::addFromXML)
             .def("__len__", &MessageSet::size)
             .def("__contains__", static_cast<bool(MessageSet::*)(const std::string&) const>(&MessageSet::contains))
             .def("__contains__", static_cast<bool(MessageSet::*)(int) const>(&MessageSet::contains));

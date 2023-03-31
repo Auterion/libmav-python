@@ -8,9 +8,12 @@ pybind11_add_module(libmav
         src/bind_Message.cpp
         src/bind_utils.cpp
         src/bind_MessageSet.cpp
-        src/bind_MessageDefinition.cpp)
+        src/bind_MessageDefinition.cpp
+        src/bind_NetworkRuntime.cpp
+        src/bind_Connection.cpp
+        src/bind_PhysicalNetwork.cpp)
 
-target_include_directories(libmav PRIVATE src/libmavlink/include)
+target_include_directories(libmav PRIVATE src/libmav/include)
 
 # EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
 # define (VERSION_INFO) here.

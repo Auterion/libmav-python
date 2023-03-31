@@ -12,6 +12,12 @@ using namespace mav;
 
 void bind_MessageDefinition(py::module m) {
 
+    py::class_<ConnectionPartner>(m, "ConnectionPartner")
+            .def_property_readonly("address", &ConnectionPartner::address)
+            .def_property_readonly("port", &ConnectionPartner::port)
+            .def_property_readonly("is_uart", &ConnectionPartner::isUart)
+            .def("__repr__", &ConnectionPartner::toString);
+
     py::class_<Identifier>(m, "Identifier")
             .def(py::init<uint8_t, uint8_t>());
 
