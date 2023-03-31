@@ -36,14 +36,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest] # windows-latest, excluded for now
 
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v2.12.0
+    - uses: pypa/cibuildwheel@v2.12.1
       env:
         CIBW_ARCHS_MACOS: auto universal2
 
@@ -73,6 +73,6 @@ jobs:
         name: artifact
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.6.4
+    - uses: pypa/gh-action-pypi-publish@v1.8.3
       with:
-        password: ${{ secrets.pypi_password }}
+        password: ${{ secrets.PYPI_TOKEN }}

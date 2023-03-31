@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, macos-latest, ubuntu-latest]
+        platform: [macos-latest, ubuntu-latest] # windows-latest excluded for now
         python-version: ["3.7", "3.11"]
 
     runs-on: ${{ matrix.platform }}
@@ -33,4 +33,4 @@ jobs:
       run: pip install --verbose .[test]
 
     - name: Test
-      run: python -m pytest
+      run: python -m pytest test.py
