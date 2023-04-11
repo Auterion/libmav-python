@@ -49,6 +49,12 @@ jobs:
         submodules: true
         fetch-depth: 0
     
+    - name: Set up QEMU
+      if: runner.os == 'Linux'
+      uses: docker/setup-qemu-action@v2
+      with:
+        platforms: all
+    
     - name: Write version.txt on release event
       if: github.event_name == 'release'
       run: echo ${{ github.event.release.tag_name }} > VERSION.txt
@@ -56,6 +62,7 @@ jobs:
     - uses: pypa/cibuildwheel@v2.12.1
       env:
         CIBW_ARCHS_MACOS: auto universal2
+        CIBW_ARCHS_LINUX: auto aarch64
         MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_SKIP: pp* #Skip PyPy builds
 
