@@ -153,7 +153,6 @@ setup(
     author="Auterion",
     author_email="success@auterion.com",
     description="A library for the MAVLink protocol",
-    long_description="",
     ext_modules=[CMakeExtension("cmake_example")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
