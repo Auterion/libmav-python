@@ -144,6 +144,9 @@ class CMakeBuild(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=build_temp, check=True
         )
 
+def get_long_description() -> str:
+    here = Path(__file__).parent
+    return (here / "README.md").read_text(encoding="utf-8")
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
@@ -153,6 +156,8 @@ setup(
     author="Auterion",
     author_email="success@auterion.com",
     description="A library for the MAVLink protocol",
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
     ext_modules=[CMakeExtension("cmake_example")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
