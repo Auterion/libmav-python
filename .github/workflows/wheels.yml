@@ -46,6 +46,8 @@ jobs:
     - uses: pypa/cibuildwheel@v2.12.1
       env:
         CIBW_ARCHS_MACOS: auto universal2
+        MACOSX_DEPLOYMENT_TARGET: 10.15
+        CIBW_SKIP: pp* #Skip PyPy builds
 
     - name: Verify clean directory
       run: git diff --exit-code
