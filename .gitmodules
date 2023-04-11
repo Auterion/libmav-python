@@ -4,4 +4,4 @@
     branch = master
 [submodule "src/libmav"]
 	path = src/libmav
-	url = git@github.com:ThomasDebrunner/libmav.git
+	url = git@github.com:Auterion/libmav.git
