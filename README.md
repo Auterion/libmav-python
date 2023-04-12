@@ -1,6 +1,14 @@
 # Libmav Python
 
 Native python bindings for the [libmav](https://github.com/ThomasDebrunner/libmav) library.
+libmav-python is a runtime defined low-level MAVLink library. 
+
+In comparison to other python MAVLink libaries, it has certain advantages:
+
+- **Runtime defined message set.** No need to recompile on message set change or custom messages
+- **Implemented in C++.** Much faster than pure python
+- **Simple, pythonic API.** No need to learn a new API or asyncio, just use python
+
 
 ## Installation
 
@@ -26,7 +34,7 @@ message_set.add_from_xml_string('''
 </mavlink>''')
 
 # Create a message from the message set
-message = self.message_set.create('MY_PROTOCOL_MESSAGE')
+message = message_set.create('MY_PROTOCOL_MESSAGE')
 
 # Set fields of the message individually
 message['my_numeric_field'] = 1
@@ -84,7 +92,7 @@ received_message = connection.receive(expectation, 1000)
 
 
 # Connect to a Serial port
-conn_physical = libmav.TCPClient('/dev/ttyUSB0', 14550)
+conn_physical = libmav.Serial('/dev/ttyUSB0')
 conn_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, client_physical)
 
 ```
