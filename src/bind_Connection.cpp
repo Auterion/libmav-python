@@ -74,8 +74,8 @@ void bind_Connection(py::module m) {
                  }, py::arg("expectation"), py::arg("timeout_ms") = -1)
             .def("receive",
                  py::overload_cast<const std::string&, int, int, int>(&Connection::receive),
-                    py::arg("message_name"), py::arg("source_id") = mav::ANY_ID,
-                    py::arg("component_id") = mav::ANY_ID, py::arg("timeout_ms") = -1)
+                    py::arg("message_name"), py::arg("source_id"),
+                    py::arg("component_id"), py::arg("timeout_ms") = -1)
             .def("receive", py::overload_cast<const std::string&, int>(&Connection::receive),
                     py::arg("message_name"), py::arg("timeout_ms") = -1)
             .def("receive", py::overload_cast<int, int, int, int>(&Connection::receive),
