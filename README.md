@@ -66,7 +66,7 @@ message_dict = message.to_dict()
 
 # Connect to a TCP server
 conn_physical = libmav.TCPClient('192.168.1.12', 14550)
-conn_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, client_physical)
+conn_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, conn_physical)
 
 connection = conn_runtime.await_connection(2000)
 
@@ -93,7 +93,7 @@ received_message = connection.receive(expectation, 1000)
 
 # Connect to a Serial port
 conn_physical = libmav.Serial('/dev/ttyUSB0')
-conn_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, client_physical)
+conn_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, conn_physical)
 
 ```
 
