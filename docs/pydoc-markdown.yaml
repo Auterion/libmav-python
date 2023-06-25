@@ -1,0 +1,13 @@
+loaders:
+- type: python
+  search_path: [./source/libmav]
+  modules:
+      - libmav
+      
+renderer:
+  type: mkdocs
+  pages:
+  - title: API Reference
+    name: libmav
+    contents:
+    - libmav*
