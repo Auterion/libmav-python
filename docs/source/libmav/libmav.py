@@ -208,11 +208,6 @@ class Connection():
         The code below shows how you might create a message and then send it.
         See `MessageSet` and `Message` for more information on how you set the message properties.
 
-        <!-- 
-        TODO: Test sending a message - whats the default values for the header.
-        Do I need to set them? (I know I can, but what is set by default). This might perhaps go in the message object. 
-        -->
-
         ```python
         # create a message
         heartbeat_message = message_set.create('HEARTBEAT')
