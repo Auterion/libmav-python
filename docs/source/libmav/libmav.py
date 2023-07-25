@@ -493,7 +493,7 @@ class MessageSet():
         """Add definitions from a MAVLink XML definition file.
         
         The new definitions are appended to the  to the `MessageSet`.
-        Overloaded definitions are replaced. <!-- is this correct? --> 
+        Overloaded definitions are replaced.
 
         ```python
         # Construct an empty message set
