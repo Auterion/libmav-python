@@ -777,7 +777,8 @@ class NetworkRuntime():
     def await_connection(self, timeout): # not sure of signature yet
         """Wait for the remote end of network to connect, or timeout.
         
-        Connection is defined as "detecting MAVLink messages". <!-- any messages or heartbeat? What about disconnection? -->
+        Note that a connection is established if _any_ decodable MAVLink message is received on the interface.
+        A connection is considered to be disconnected if no decodable message is received within three seconds.
 
         ```python
         # Connect to a TCP server
