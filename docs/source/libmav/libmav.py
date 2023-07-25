@@ -228,8 +228,7 @@ class ConnectionPartner():
     Libmav applications can use these to differentiate between connections on the same `NetworkRuntime` interface.
     This is needed for server interfaces (`UDPServer` or `TCPServer`), where more than one external system might connect to the port libmav is listening on,        
 
-    <!-- Serial connection just set is_uart because you don't need to know what the address is for differentiation? -->
-    -->
+For serial connections `is_uart` is set (there is no need to differentiate partners, because there can only be one partner on the interface).
 
     Attributes:
         address (int): The IP address of the remote end of the connection (int32).
