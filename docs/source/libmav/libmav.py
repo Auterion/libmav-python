@@ -983,9 +983,9 @@ class UDPServer():
     physical_interface = libmav.UDPServer(connection_port)
     ```
 
-    Note that multiple remote computers might connect to this interface, and `ConnectionPartner` would be created for each and called back using 
+    Multiple remote computers might connect to this interface.
     A separate `ConnectionPartner` instance is created for each, and made available to user code in the `NetworkRuntime.on_connection()` callback.
-    <!-- what happens if you don't register for the callback? Is the object created but inaccessible? -->
+    Note that `NetworkRuntime.await_connection()` only waits for the first connection: if you don't use `on_connection()` the other `ConnectionPartner` instances will be inaccessible.
     """
        
     def __init__(local_port):
