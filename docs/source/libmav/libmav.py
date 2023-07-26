@@ -1019,6 +1019,9 @@ class Serial():
     physical_interface = libmav.Serial(device_name, baud_rate, false)
     ```
 
+To use this interface you then pass it to a `NetworkRuntime` with a HEARTBEAT, and then call `NetworkRuntime.awaitConnection()` (on both ends of the connection).
+This is the same pattern as for `TCPClient` and `UDPClient`.
+
     """
     pass
     
