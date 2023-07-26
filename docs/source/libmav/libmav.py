@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-# This file is an experiment
+# This is a "fake" source file for libmav that mimics the API and can be used to build markdown docs to docs/content/libmav.md
+# The build tool is pydoc-markdown: https://niklasrosenstein.github.io/pydoc-markdown/) 
+# Install using: pip install pydoc-markdown
+# Run in the /docs directory: pydoc-markdown
+# This is flexible and can accept many input formats, and many output formats.
+# The current set defined in docs/pydoc-markdown.yaml
 
 
 class Connection():
