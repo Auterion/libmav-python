@@ -847,21 +847,21 @@ class NetworkRuntime():
     def on_connection_lost(self): # not sure of signature yet
         """Set a callback function that is called whenever a `Connection` is lost.
         
-        A connection is lost if no data is detected from corresponding connection partner within three seconds (i.e. it is no longer returning true for `Connection.alive()`).
+        A connection is lost if no decodable MAVLink messages are detected from the corresponding connection partner within three seconds (i.e. it is no longer returning `true` for `Connection.alive()`).
         
         The callback function is called with the `Connection` object for the lost connection.
         The identify of the `ConnectionPartner` can be determined using the `Connection.partner()` method.
-        
 
-       ```python
-       # Define a callback function
-       def callbackDisonnected(connection):
-           print(f'Disconnected: {connection}')
+        ```python
+        # Define a callback function
+        def callbackDisconnected(connection):
+            print(f'Disconnected: {connection}')
     
-       conn_runtime.on_connection_lost(callbackDisonnected)        
+        conn_runtime.on_connection_lost(callbackDisconnected)        
         ```
-        
-        
+
+        Note that if you lose a connection and want to recover it, you will need to recreate the physical interface and the `NetworkRuntime`, and then wait for the `Connection` again.
+
         Args: 
             callbackFn (method): Callback function that takes a `Connection` object as its argument.
     
