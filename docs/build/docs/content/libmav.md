@@ -179,26 +179,27 @@ def receive(messageName, timeout)
 Synchronously receive a streamed message.
 
 The method blocks and waits for the specified message to be received.
-It either returns the message or raises an exception after a timeout (`TimeOut` Exception). <!-- check the error -->
+It either returns the message or raises an exception after a timeout (`TimeOut` Exception).
 
 The code below shows how you might wait for a message with a 1 second timeout.
 
 
 > **Note**
-> - The synchonous recieve methods wait on only one message, and will ignore any other messages that arrive in the meantime.
->   If you want to wait on more than one message you will need to use `add_message_callback()`.
-> - Use the `receive(self, expectation, timeout)` version to wait on a message in response to a message you have sent.
->   There is a race condition if you use this method, because the response might be received before you can call the recieve message.
+> - This method waits on only one message, and will ignore any other messages that arrive in the meantime.
+>   If you want to wait on more than one message you will need to use `receive(self, expectation, timeout)`
+or `add_message_callback()`.
+> - Use the `receive(self, expectation, timeout)` version to wait on a message that is emitted in response to a message you have sent.
+>   This avoids the race condition where you potentially start waiting for a message that has already been received.
 
-```python
-// receive a message, with a 1s timeout
-messageReceived = connection.receive("PARAM_VALUE", 1000);
-```
+       ```python
+       // receive a message, with a 1s timeout
+       messageReceived = connection.receive("PARAM_VALUE", 1000);
+       ```
 
 **Arguments**:
 
 - `messageName` _string_ - The name of the message to wait for.
-- `timeout` _int_ - Timeout in miliseconds. By default there is no timeout.
+- `timeout` _int_ - Timeout in milliseconds. By default there is no timeout.
   
 
 **Returns**:
@@ -215,17 +216,20 @@ def receive(expectation, timeout)
 
 Synchronously receive an _expected_ message triggered by a send operation.
 
-This version of the method should be used to recieve a particular message that is emitted when you first send some other message.
-If the message is streamed, it is simpler to use the the `receive(self, message, timeout)`.
+This version of the method should be used to receive a particular message that is emitted when you first send some other message.
+If the message is streamed, it is simpler to use the `receive(self, message, timeout)` version.
 
 The method blocks and waits for the expected message to be received.
 It either returns the message or exits after a timeout.
 
 
-> **Note**
-> - The synchonous recieve methods wait on only one message, and will ignore any other messages that arrive in the meantime.
->   If you want to wait on more than one message you will need to use `add_message_callback()`.
-> - Use the `receive(self, messageName, timeout)` version to wait on a message that is being streamed..
+You can also wait on multiple expected messages, which might be received in any order.
+The example below shows this for `GLOBAL_POSITION_INT` and `ALTITUDE`:
+
+
+In the above example, the first `receive()` call will block until `GLOBAL_POSITION_INT` is received.
+If `ALTITUDE` was received while waiting for `GLOBAL_POSITION_INT`, the second `receive()` call will complete immediately: otherwise it will block until `ALTITUDE` arrives.
+Or to put it another way, each `receive()` call blocks until its expectation is met, but an expectation may already be met by the time the corresponding  `receive()` method is called.
 
 ```python
 # create a message
@@ -240,11 +244,17 @@ connection.send(messageToSend);
 # receive the expected message, with a 1s timeout
 messageReceived = connection.receive(expectation, 1000);
 ```
+```python
+global_position_expectation = connection.expect(''GLOBAL_POSITION_INT')
+altitude_expectation = connection.expect('ALTITUDE')
+connection.receive(global_position_expectation)
+connection.receive(altitude_expectation)
+```
 
 **Arguments**:
 
 - `expectation` _ExpectationWrapper_ - An expectation, created using `Connection.expect()`.
-- `timeout` _int_ - Timeout in miliseconds. By default there is no timeout.
+- `timeout` _int_ - Timeout in milliseconds. By default there is no timeout.
   
 
 **Returns**:
@@ -286,11 +296,6 @@ Send a message.
 The code below shows how you might create a message and then send it.
 See `MessageSet` and `Message` for more information on how you set the message properties.
 
-<!--
-TODO: Test sending a message - whats the default values for the header.
-Do I need to set them? (I know I can, but what is set by default). This might perhaps go in the message object.
--->
-
 
 ```python
 # create a message
@@ -318,8 +323,7 @@ Objects of this type are returned by `Connection.partner()`.
 Libmav applications can use these to differentiate between connections on the same `NetworkRuntime` interface.
 This is needed for server interfaces (`UDPServer` or `TCPServer`), where more than one external system might connect to the port libmav is listening on,
 
-<!-- Serial connection just set is_uart because you don't need to know what the address is for differentiation? -->
--->
+For serial connections `is_uart` is set (there is no need to differentiate partners, because there can only be one partner on the interface).
 
 **Attributes**:
 
@@ -644,7 +648,7 @@ def add_from_xml_file(definition_file)
 Add definitions from a MAVLink XML definition file.
 
 The new definitions are appended to the  to the `MessageSet`.
-Overloaded definitions are replaced. <!-- is this correct? -->
+Overloaded definitions are replaced.
 
 
 ```python
@@ -1013,7 +1017,8 @@ def await_connection(timeout)
 
 Wait for the remote end of network to connect, or timeout.
 
-Connection is defined as "detecting MAVLink messages". <!-- any messages or heartbeat? What about disconnection? -->
+Note that a connection is established if _any_ decodable MAVLink message is received on the interface.
+A connection is considered to be disconnected if no decodable message is received within three seconds.
 
 
 ```python
@@ -1090,21 +1095,21 @@ def on_connection_lost()
 
 Set a callback function that is called whenever a `Connection` is lost.
 
-A connection is lost if no data is detected from corresponding connection partner within three seconds (i.e. it is no longer returning true for `Connection.alive()`).
+A connection is lost if no decodable MAVLink messages are detected from the corresponding connection partner within three seconds (i.e. it is no longer returning `true` for `Connection.alive()`).
 
 The callback function is called with the `Connection` object for the lost connection.
 The identify of the `ConnectionPartner` can be determined using the `Connection.partner()` method.
 
 
-
+Note that if you lose a connection and want to recover it, you will need to recreate the physical interface and the `NetworkRuntime`, and then wait for the `Connection` again.
 
 ```python
 # Define a callback function
-def callbackDisonnected(connection):
+def callbackDisconnected(connection):
     print(f'Disconnected: {connection}')
 
-conn_runtime.on_connection_lost(callbackDisonnected)        
- ```
+conn_runtime.on_connection_lost(callbackDisconnected)        
+```
 
 **Arguments**:
 
@@ -1283,9 +1288,9 @@ connection_port = 14551
 physical_interface = libmav.UDPServer(connection_port)
 ```
 
-Note that multiple remote computers might connect to this interface, and `ConnectionPartner` would be created for each and called back using 
+Multiple remote computers might connect to this interface.
 A separate `ConnectionPartner` instance is created for each, and made available to user code in the `NetworkRuntime.on_connection()` callback.
-<!-- what happens if you don't register for the callback? Is the object created but inaccessible? -->
+Note that `NetworkRuntime.await_connection()` only waits for the first connection: if you don't use `on_connection()` the other `ConnectionPartner` instances will be inaccessible.
 
 <a id="libmav.UDPServer.__init__"></a>
 
@@ -1322,17 +1327,20 @@ class Serial()
 ```
 
 Represents a connection for listening on a specified serial port for MAVLink traffic.
-<!-- does it listen or ping, or both? How do we describe this-->
+    <!-- does it listen or ping, or both? How do we describe this-->
 
-An object of this type may be passed to `NetworkRuntime` in order to define the physical connection is a serial port/UART.
+    An object of this type may be passed to `NetworkRuntime` in order to define the physical connection is a serial port/UART.
 
-For example, to define a `Serial` network interface for a Linux computer (e.g. RasPi) connected to the vehicle via Serial portR:
+    For example, to define a `Serial` network interface for a Linux computer (e.g. RasPi) connected to the vehicle via Serial portR:
 
-```python
-device_name = '/dev/ttyAMA0'
-baud_rate = 57600
-physical_interface = libmav.Serial(device_name, baud_rate, false)
-```
+    ```python
+    device_name = '/dev/ttyAMA0'
+    baud_rate = 57600
+    physical_interface = libmav.Serial(device_name, baud_rate, false)
+    ```
+
+To use this interface you then pass it to a `NetworkRuntime` with a HEARTBEAT, and then call `NetworkRuntime.awaitConnection()` (on both ends of the connection).
+This is the same pattern as for `TCPClient` and `UDPClient`.
 
 <a id="libmav.Serial.__init__"></a>
 
