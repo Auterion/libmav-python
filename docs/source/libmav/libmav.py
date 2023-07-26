@@ -129,7 +129,7 @@ class Connection():
         """Synchronously receive a streamed message.
         
         The method blocks and waits for the specified message to be received.
-        It either returns the message or raises an exception after a timeout (`TimeOut` Exception). <!-- check the error -->
+        It either returns the message or raises an exception after a timeout (`TimeOut` Exception). 
         
         The code below shows how you might wait for a message with a 1 second timeout.
         
@@ -139,14 +139,15 @@ class Connection():
         ```
 
         > **Note**
-        > - The synchonous recieve methods wait on only one message, and will ignore any other messages that arrive in the meantime. 
-        >   If you want to wait on more than one message you will need to use `add_message_callback()`.
-        > - Use the `receive(self, expectation, timeout)` version to wait on a message in response to a message you have sent.
-        >   There is a race condition if you use this method, because the response might be received before you can call the recieve message.
+        > - This method waits on only one message, and will ignore any other messages that arrive in the meantime. 
+        >   If you want to wait on more than one message you will need to use `receive(self, expectation, timeout)` 
+ or `add_message_callback()`.
+        > - Use the `receive(self, expectation, timeout)` version to wait on a message that is emitted in response to a message you have sent.
+        >   This avoids the race condition where you potentially start waiting for a message that has already been received.
         
         Args: 
             messageName (string): The name of the message to wait for.
-            timeout (int): Timeout in miliseconds. By default there is no timeout.
+            timeout (int): Timeout in milliseconds. By default there is no timeout.
 
         Returns:
             Message: The message that was waited on.
@@ -155,8 +156,8 @@ class Connection():
     def receive(self, expectation, timeout):
         """Synchronously receive an _expected_ message triggered by a send operation.
         
-        This version of the method should be used to recieve a particular message that is emitted when you first send some other message.
-        If the message is streamed, it is simpler to use the the `receive(self, message, timeout)`.
+        This version of the method should be used to receive a particular message that is emitted when you first send some other message.
+        If the message is streamed, it is simpler to use the `receive(self, message, timeout)` version.
         
         The method blocks and waits for the expected message to be received.
         It either returns the message or exits after a timeout.
@@ -175,14 +176,23 @@ class Connection():
         messageReceived = connection.receive(expectation, 1000);
         ```
 
-        > **Note**
-        > - The synchonous recieve methods wait on only one message, and will ignore any other messages that arrive in the meantime. 
-        >   If you want to wait on more than one message you will need to use `add_message_callback()`.
-        > - Use the `receive(self, messageName, timeout)` version to wait on a message that is being streamed..
+        You can also wait on multiple expected messages, which might be received in any order.
+        The example below shows this for `GLOBAL_POSITION_INT` and `ALTITUDE`:
+
+        ```python
+        global_position_expectation = connection.expect(''GLOBAL_POSITION_INT')
+        altitude_expectation = connection.expect('ALTITUDE')
+        connection.receive(global_position_expectation)
+        connection.receive(altitude_expectation)
+        ```
+
+        In the above example, the first `receive()` call will block until `GLOBAL_POSITION_INT` is received.
+        If `ALTITUDE` was received while waiting for `GLOBAL_POSITION_INT`, the second `receive()` call will complete immediately: otherwise it will block until `ALTITUDE` arrives.
+        Or to put it another way, each `receive()` call blocks until its expectation is met, but an expectation may already be met by the time the corresponding  `receive()` method is called.  
 
         Args: 
             expectation (ExpectationWrapper): An expectation, created using `Connection.expect()`.
-            timeout (int): Timeout in miliseconds. By default there is no timeout.
+            timeout (int): Timeout in milliseconds. By default there is no timeout.
 
         Returns:
             Message: The message that was waited on.
