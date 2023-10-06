@@ -86,7 +86,7 @@ received_message = connection.receive("HEARTBEAT")
 
 # Receive a message as the result of a message we send
 # This avoids the race condition between us sending and then waiting for reception
-expectation = connection.receive("PARAM_VALUE")
+expectation = connection.expect("PARAM_VALUE")
 connection.send(our_param_request_message)
 received_message = connection.receive(expectation, 1000)
 
@@ -96,6 +96,10 @@ conn_physical = libmav.Serial('/dev/ttyUSB0')
 conn_runtime = libmav.NetworkRuntime(self.message_set, heartbeat, conn_physical)
 
 ```
+
+⚠️ **Note:** The network runtime object and the physical interface object must be kept
+scope for the duration of the connection. Otherwise, the connection will not have
+a valid underlying network and will crash.
 
 ## Install from source
 
