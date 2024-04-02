@@ -59,7 +59,7 @@ jobs:
       if: github.event_name == 'release'
       run: echo ${{ github.event.release.tag_name }} > VERSION.txt
 
-    - uses: pypa/cibuildwheel@v2.12.1
+    - uses: pypa/cibuildwheel@v2.17.0
       env:
         CIBW_ARCHS_MACOS: auto universal2
         CIBW_ARCHS_LINUX: auto aarch64
