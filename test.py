@@ -100,6 +100,11 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(message['float_arr_field'], [1.0, 2.0, 3.0])
         self.assertEqual(message['int32_arr_field'], [4, 5, 6])
 
+    def testMessageFloatPackUnpack(self):
+        message = self.message_set.create('BIG_MESSAGE')
+        message.set_as_float_pack('float_field', 12)
+        self.assertEqual(message.get_as_float_unpack('float_field'), 12)
+
     def testSetFromDict(self):
         message = self.message_set.create('BIG_MESSAGE')
 

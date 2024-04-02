@@ -47,4 +47,8 @@ void bind_utils(py::module m) {
             .def("crc16", &CRC::crc16)
             .def("crc8", &CRC::crc8);
 
+    m.def("float_pack", &floatPack<int32_t>);
+    m.def("float_pack", &floatPack<uint32_t>);
+    m.def("float_unpack", &floatUnpack<int32_t>);
+    m.def("float_unpack_unsigned", &floatUnpack<uint32_t>);
 }
