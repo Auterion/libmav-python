@@ -51,6 +51,7 @@ void bind_PhysicalNetwork(py::module m) {
 
     py::class_<UDPServer, NetworkInterface>(m, "UDPServer")
             .def(py::init<int>(), py::arg("local_port"))
+            .def("join_multicast_group", &UDPServer::joinMulticastGroup)
             .def("close", &UDPServer::close);
 
     py::class_<TCPServer, NetworkInterface>(m, "TCPServer")
