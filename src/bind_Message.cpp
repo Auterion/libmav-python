@@ -90,6 +90,14 @@ void bind_Message(py::module m) {
                  py::arg("field_key"), py::arg("value"), py::arg("array_index") = 0)
             .def("__setitem__", &Message::set<const std::string&>,
                  py::arg("field_key"), py::arg("value"), py::arg("array_index") = 0)
+            .def("set_as_float_pack", &Message::setAsFloatPack<int32_t>,
+                    py::arg("field_key"), py::arg("value"), py::arg("array_index") = 0)
+            .def("set_as_float_pack", &Message::setAsFloatPack<uint32_t>,
+                    py::arg("field_key"), py::arg("value"), py::arg("array_index") = 0)
+            .def("get_as_float_unpack", &Message::getAsFloatUnpack<int32_t>,
+                    py::arg("field_key"), py::arg("array_index") = 0)
+            .def("get_as_float_unpack_unsigned", &Message::getAsFloatUnpack<uint32_t>,
+                    py::arg("field_key"), py::arg("array_index") = 0)
             .def("set_from_dict", [](Message &m, const py::dict &d) {
                 setFromDict(m, d);
                 return m;
