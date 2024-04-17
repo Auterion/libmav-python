@@ -1,6 +1,6 @@
 # Libmav Python
 
-Native python bindings for the [libmav](https://github.com/ThomasDebrunner/libmav) library.
+Native python bindings for the [libmav](https://github.com/Auterion/libmav) library.
 libmav-python is a runtime defined low-level MAVLink library. 
 
 In comparison to other python MAVLink libaries, it has certain advantages:
