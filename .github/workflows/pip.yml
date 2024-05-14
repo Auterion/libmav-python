@@ -14,6 +14,10 @@ jobs:
       matrix:
         platform: [macos-latest, ubuntu-latest] # windows-latest excluded for now
         python-version: ["3.7", "3.11"]
+        exclude:
+          # 3.7 is not available anymore on macos-latest
+          - platform: macos-latest
+            python-version: "3.7"
 
     runs-on: ${{ matrix.platform }}
 
