@@ -52,36 +52,46 @@ void bind_Connection(py::module m) {
     py::class_<Connection, std::shared_ptr<Connection>>(m, "Connection")
             .def("alive", &Connection::alive)
             .def("partner", &Connection::partner)
-            .def("send", &Connection::send)
+            .def("send", &Connection::send, py::call_guard<py::gil_scoped_release>())
             .def("add_message_callback",
-                (&Connection::addMessageCallback<std::function<void(const Message&)>>))
+                 (&Connection::addMessageCallback<std::function<void(const Message &)>>),
+                 py::call_guard<py::gil_scoped_release>())
             .def("add_message_callback",
-                (&Connection::addMessageCallback<std::function<void(const Message&)>,
-                        std::function<void(const std::exception_ptr&)>>))
-            .def("remove_message_callback", &Connection::removeMessageCallback)
+                 (&Connection::addMessageCallback<std::function<void(const Message &)>,
+                         std::function<void(const std::exception_ptr &)>>),
+                 py::call_guard<py::gil_scoped_release>())
+            .def("remove_message_callback", &Connection::removeMessageCallback,
+                 py::call_guard<py::gil_scoped_release>())
             .def("expect",
-                 [](Connection& self, int message_id, int source_id, int component_id) {
-                     return _ExpectationWrapper {self.expect(message_id, source_id, component_id)};
+                 [](Connection &self, int message_id, int source_id, int component_id) {
+                     py::gil_scoped_release release;
+                     return _ExpectationWrapper{self.expect(message_id, source_id, component_id)};
                  }, py::arg("message_id"), py::arg("source_id") = mav::ANY_ID,
-                    py::arg("component_id") = mav::ANY_ID)
-            .def("expect", [](Connection& self, const std::string& message_name, int source_id, int component_id) {
-                return _ExpectationWrapper {self.expect(message_name, source_id, component_id)};
-            }, py::arg("message_name"), py::arg("source_id") = mav::ANY_ID,
-                    py::arg("component_id") = mav::ANY_ID)
+                 py::arg("component_id") = mav::ANY_ID)
+            .def("expect", [](Connection &self, const std::string &message_name, int source_id, int component_id) {
+                     py::gil_scoped_release release;
+                     return _ExpectationWrapper{self.expect(message_name, source_id, component_id)};
+                 }, py::arg("message_name"), py::arg("source_id") = mav::ANY_ID,
+                 py::arg("component_id") = mav::ANY_ID)
             .def("receive",
-                 [](Connection& self, const _ExpectationWrapper& expectation, int timeout_ms) {
+                 [](Connection &self, const _ExpectationWrapper &expectation, int timeout_ms) {
+                     py::gil_scoped_release release;
                      return self.receive(expectation.expectation, timeout_ms);
                  }, py::arg("expectation"), py::arg("timeout_ms") = -1)
             .def("receive",
-                 py::overload_cast<const std::string&, int, int, int>(&Connection::receive),
-                    py::arg("message_name"), py::arg("source_id"),
-                    py::arg("component_id"), py::arg("timeout_ms") = -1)
-            .def("receive", py::overload_cast<const std::string&, int>(&Connection::receive),
-                    py::arg("message_name"), py::arg("timeout_ms") = -1)
+                 py::overload_cast<const std::string &, int, int, int>(&Connection::receive),
+                 py::call_guard<py::gil_scoped_release>(),
+                 py::arg("message_name"), py::arg("source_id"),
+                 py::arg("component_id"), py::arg("timeout_ms") = -1)
+            .def("receive", py::overload_cast<const std::string &, int>(&Connection::receive),
+                 py::call_guard<py::gil_scoped_release>(),
+                 py::arg("message_name"), py::arg("timeout_ms") = -1)
             .def("receive", py::overload_cast<int, int, int, int>(&Connection::receive),
-                    py::arg("message_id"), py::arg("source_id") = mav::ANY_ID,
-                    py::arg("component_id") = mav::ANY_ID, py::arg("timeout_ms") = -1)
+                 py::call_guard<py::gil_scoped_release>(),
+                 py::arg("message_id"), py::arg("source_id") = mav::ANY_ID,
+                 py::arg("component_id") = mav::ANY_ID, py::arg("timeout_ms") = -1)
             .def("receive", py::overload_cast<int, int>(&Connection::receive),
-                    py::arg("message_id"), py::arg("timeout_ms") = -1);
+                 py::call_guard<py::gil_scoped_release>(),
+                 py::arg("message_id"), py::arg("timeout_ms") = -1);
 }
 
