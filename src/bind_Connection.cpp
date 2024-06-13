@@ -48,7 +48,6 @@ struct _ExpectationWrapper {
 };
 
 // Class to queue incoming messages from a Connection to be accessed asynchronously by python
-// (in order to avoid deadlocks)
 class MessageQueue {
 private:
     std::queue<Message> _messages;
@@ -56,12 +55,13 @@ private:
     std::weak_ptr<Connection> _connection;
     CallbackHandle _cb_handle;
 public:
-    MessageQueue(std::shared_ptr<Connection>& connection) : _connection(connection) {
-        _cb_handle = connection->addMessageCallback([this](const Message& message) {
+    MessageQueue(std::shared_ptr<Connection> &connection) : _connection(connection) {
+        _cb_handle = connection->addMessageCallback([this](const Message &message) {
             std::lock_guard lg{_lock};
             _messages.push(message);
         });
     }
+
     ~MessageQueue() {
         auto connection = _connection.lock();
         if (connection) {
@@ -78,6 +78,11 @@ public:
         _messages.pop();
         return ret;
     }
+
+    std::size_t size() {
+        std::lock_guard lg{_lock};
+        return _messages.size();
+    }
 };
 
 
@@ -86,8 +91,18 @@ void bind_Connection(py::module m) {
             .def(py::init<>());
 
     py::class_<MessageQueue>(m, "MessageQueue")
-            .def(py::init<std::shared_ptr<Connection>&>())
-            .def("next", &MessageQueue::next, py::call_guard<py::gil_scoped_release>());
+            .def(py::init<std::shared_ptr<Connection> &>())
+            .def("next", &MessageQueue::next, py::call_guard<py::gil_scoped_release>())
+            .def("__iter__", [](MessageQueue &self) -> MessageQueue & { return self; })
+            .def("__next__", [](MessageQueue &self) {
+                py::gil_scoped_release release;
+                auto msg = self.next();
+                if (!msg) {
+                    throw py::stop_iteration();
+                }
+                return *msg;
+            })
+            .def("__len__", &MessageQueue::size, py::call_guard<py::gil_scoped_release>());
 
     py::class_<Connection, std::shared_ptr<Connection>>(m, "Connection")
             .def("alive", &Connection::alive)
@@ -134,4 +149,3 @@ void bind_Connection(py::module m) {
                  py::call_guard<py::gil_scoped_release>(),
                  py::arg("message_id"), py::arg("timeout_ms") = -1);
 }
-
