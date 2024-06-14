@@ -36,6 +36,9 @@
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
 #include "mav/Connection.h"
+#include <queue>
+#include <mutex>
+#include <optional>
 
 namespace py = pybind11;
 using namespace mav;
@@ -44,10 +47,62 @@ struct _ExpectationWrapper {
     Connection::Expectation expectation;
 };
 
+// Class to queue incoming messages from a Connection to be accessed asynchronously by python
+class MessageQueue {
+private:
+    std::queue<Message> _messages;
+    std::mutex _lock;
+    std::weak_ptr<Connection> _connection;
+    CallbackHandle _cb_handle;
+public:
+    MessageQueue(std::shared_ptr<Connection> &connection) : _connection(connection) {
+        _cb_handle = connection->addMessageCallback([this](const Message &message) {
+            std::lock_guard lg{_lock};
+            _messages.push(message);
+        });
+    }
+
+    ~MessageQueue() {
+        auto connection = _connection.lock();
+        if (connection) {
+            connection->removeMessageCallback(_cb_handle);
+        }
+    }
+
+    std::optional<Message> next() {
+        std::lock_guard lg{_lock};
+        if (_messages.empty()) {
+            return std::nullopt;
+        }
+        const Message ret = _messages.front();
+        _messages.pop();
+        return ret;
+    }
+
+    std::size_t size() {
+        std::lock_guard lg{_lock};
+        return _messages.size();
+    }
+};
+
 
 void bind_Connection(py::module m) {
     py::class_<_ExpectationWrapper>(m, "_ExpectationWrapper")
             .def(py::init<>());
+
+    py::class_<MessageQueue>(m, "MessageQueue")
+            .def(py::init<std::shared_ptr<Connection> &>())
+            .def("next", &MessageQueue::next, py::call_guard<py::gil_scoped_release>())
+            .def("__iter__", [](MessageQueue &self) -> MessageQueue & { return self; })
+            .def("__next__", [](MessageQueue &self) {
+                py::gil_scoped_release release;
+                auto msg = self.next();
+                if (!msg) {
+                    throw py::stop_iteration();
+                }
+                return *msg;
+            })
+            .def("__len__", &MessageQueue::size, py::call_guard<py::gil_scoped_release>());
 
     py::class_<Connection, std::shared_ptr<Connection>>(m, "Connection")
             .def("alive", &Connection::alive)
@@ -94,4 +149,3 @@ void bind_Connection(py::module m) {
                  py::call_guard<py::gil_scoped_release>(),
                  py::arg("message_id"), py::arg("timeout_ms") = -1);
 }
-
