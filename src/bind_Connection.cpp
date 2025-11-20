@@ -109,14 +109,19 @@ void bind_Connection(py::module m) {
             .def("partner", &Connection::partner)
             .def("send", &Connection::send, py::call_guard<py::gil_scoped_release>())
             .def("add_message_callback",
-                 (&Connection::addMessageCallback<std::function<void(const Message &)>>),
-                 py::call_guard<py::gil_scoped_release>())
+                [](Connection& self, std::function<void(const Message&)> cb) {
+                    return self.addMessageCallback(cb);
+                },
+                py::call_guard<py::gil_scoped_release>())
+
             .def("add_message_callback",
-                 (&Connection::addMessageCallback<std::function<void(const Message &)>,
-                         std::function<void(const std::exception_ptr &)>>),
-                 py::call_guard<py::gil_scoped_release>())
+                [](Connection& self, std::function<void(const Message&)> cb, std::function<void(const std::exception_ptr&)> err_cb) {
+                    return self.addMessageCallback(cb, err_cb);
+                },
+                py::call_guard<py::gil_scoped_release>())
             .def("remove_message_callback", &Connection::removeMessageCallback,
                  py::call_guard<py::gil_scoped_release>())
+            .def("remove_all_callbacks", &Connection::removeAllCallbacks)
             .def("expect",
                  [](Connection &self, int message_id, int source_id, int component_id) {
                      py::gil_scoped_release release;
