@@ -12,11 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest] # windows-latest excluded for now
+        platform: [macos-latest, ubuntu-22.04, ubuntu-latest] # windows-latest excluded for now
         python-version: ["3.7", "3.11"]
         exclude:
           # 3.7 is not available anymore on macos-latest
           - platform: macos-latest
+            python-version: "3.7"
+          - platform: ubuntu-latest
             python-version: "3.7"
 
     runs-on: ${{ matrix.platform }}
@@ -34,6 +36,16 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+
+    - name: Set up CMake >= 3.5
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update
+          sudo apt-get install -y cmake
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install cmake
+        fi
+        cmake --version
 
     - name: Add requirements
       run: python -m pip install --upgrade wheel setuptools

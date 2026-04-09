@@ -57,6 +57,7 @@ void bind_NetworkRuntime(py::module m) {
             .def("on_connection_lost", &NetworkRuntime::onConnectionLost)
             .def("await_connection", &NetworkRuntime::awaitConnection)
             .def("set_heartbeat_message", &NetworkRuntime::setHeartbeatMessage)
-            .def("clear_heartbeat_message", &NetworkRuntime::clearHeartbeat);
+            .def("clear_heartbeat_message", &NetworkRuntime::clearHeartbeat)
+            .def("stop", &NetworkRuntime::stop);
 }
 

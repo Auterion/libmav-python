@@ -48,7 +48,8 @@ void bind_MessageSet(py::module m) {
             .def("create", static_cast<Message(MessageSet::*)(int) const>(&MessageSet::create))
             .def("id_for_message", &MessageSet::idForMessage)
             .def("enum", &MessageSet::enum_for)
-            .def("add_from_xml_string", &MessageSet::addFromXMLString)
+            .def("add_from_xml_string", &MessageSet::addFromXMLString,
+                py::arg("xml_string"), py::arg("recursive_open_includes") = false)
             .def("add_from_xml_file", &MessageSet::addFromXML)
             .def("__len__", &MessageSet::size)
             .def("__contains__", static_cast<bool(MessageSet::*)(const std::string&) const>(&MessageSet::contains))
