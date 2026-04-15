@@ -85,7 +85,7 @@ jobs:
         CIBW_MUSLLINUX_X86_64_IMAGE: quay.io/pypa/musllinux_1_2_x86_64
         CIBW_MUSLLINUX_AARCH64_IMAGE: quay.io/pypa/musllinux_1_2_aarch64
         CIBW_BEFORE_ALL_LINUX: if command -v apk > /dev/null; then apk add --no-cache libatomic; else dnf install -y libatomic; fi
-        CIBW_SKIP: pp* cp36-* cp37-* *-manylinux_i686
+        CIBW_SKIP: pp* cp36-* cp37-* *_i686
         MACOSX_DEPLOYMENT_TARGET: 10.15
 
     - name: Verify clean directory
